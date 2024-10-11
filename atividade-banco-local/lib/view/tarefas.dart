@@ -21,16 +21,18 @@ class _TarefasState extends State<Tarefas> {
 
   // Carregar tarefas do banco de dados
   Future<void> _carregaTarefa() async {
-    final tarefaList = await Bd.instance.getTarefa(); // Chama o método gettarefas
+    final tarefaList =
+        await Bd.instance.getTarefa(); // Chama o método gettarefas
     setState(() {
       tarefas = tarefaList;
     });
   }
 
-  // Método para abrir o diálogo de edição
-  void _showEditDialog(BuildContext context, int id, String nome, String descricao) {
+  void caixaEditar(
+      BuildContext context, int id, String nome, String descricao) {
     TextEditingController nomeController = TextEditingController(text: nome);
-    TextEditingController descricaoController = TextEditingController(text: descricao);
+    TextEditingController descricaoController =
+        TextEditingController(text: descricao);
 
     showDialog(
       context: context,
@@ -60,7 +62,8 @@ class _TarefasState extends State<Tarefas> {
             TextButton(
               child: Text("Atualizar"),
               onPressed: () {
-                _controller.atualizarTarefa(id, nomeController.text, descricaoController.text);
+                _controller.atualizarTarefa(
+                    id, nomeController.text, descricaoController.text);
                 _carregaTarefa();
                 Navigator.of(context).pop();
               },
@@ -71,55 +74,56 @@ class _TarefasState extends State<Tarefas> {
     );
   }
 
-  // Método para adicionar nova tarefa
-  void _showAddDialog(BuildContext context) {
-  TextEditingController nomeController = TextEditingController();
-  TextEditingController descricaoController = TextEditingController();
+  void caixaAdicionar(BuildContext context) {
+    TextEditingController nomeController = TextEditingController();
+    TextEditingController descricaoController = TextEditingController();
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("Adicionar Tarefa"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nomeController,
-              decoration: InputDecoration(labelText: 'Tarefa'),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Adicionar Tarefa"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nomeController,
+                decoration: InputDecoration(labelText: 'Tarefa'),
+              ),
+              TextField(
+                controller: descricaoController,
+                decoration: InputDecoration(labelText: 'Descrição da Tarefa'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text("Cancelar"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
-            TextField(
-              controller: descricaoController,
-              decoration: InputDecoration(labelText: 'Descrição da Tarefa'),
+            TextButton(
+              child: Text("Adicionar"),
+              onPressed: () {
+                _controller.criarTarefa(
+                    nomeController.text, descricaoController.text);
+                _carregaTarefa();
+                Navigator.of(context).pop();
+              },
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            child: Text("Cancelar"),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text("Adicionar"),
-            onPressed: () {
-              _controller.criarTarefa(nomeController.text, descricaoController.text);
-              _carregaTarefa();
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Tarefas",
+        title: Text(
+          "Tarefas",
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue[600],
@@ -131,8 +135,9 @@ class _TarefasState extends State<Tarefas> {
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
               tileColor: Colors.lightBlue[100],
-              title: Text(tarefas[index]['nome'],
-                style: TextStyle(color: Colors.black),  
+              title: Text(
+                tarefas[index]['nome'],
+                style: TextStyle(color: Colors.black),
               ),
               subtitle: Text('${tarefas[index]['descricao']}'),
               trailing: Row(
@@ -140,7 +145,7 @@ class _TarefasState extends State<Tarefas> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.edit),
-                    onPressed: () => _showEditDialog(
+                    onPressed: () => caixaEditar(
                       context,
                       tarefas[index]['id'],
                       tarefas[index]['nome'],
@@ -150,11 +155,32 @@ class _TarefasState extends State<Tarefas> {
                   IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () => {
-                      _controller.deletarTarefa(tarefas[index]['id']),
-                      _carregaTarefa(),
-                      }
-                    ,
-                    
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title:
+                                  Text("Você tem certeza que deseja remover ?"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Cancelar"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text("Deletar"),
+                                  onPressed: () {
+                                    _controller
+                                        .deletarTarefa(tarefas[index]['id']);
+                                    _carregaTarefa();
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          })
+                    },
                   ),
                 ],
               ),
@@ -166,7 +192,7 @@ class _TarefasState extends State<Tarefas> {
         backgroundColor: Colors.blue[100],
         onPressed: () {
           setState(() {
-             _showAddDialog(context);
+            caixaAdicionar(context);
           });
         },
         child: const Icon(Icons.add, color: Colors.black, size: 28),
